@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db';
 import Order from '@/lib/models/Order';
 import Product from '@/lib/models/Product';
 import Store from '@/lib/models/Store';
+import Customer from '@/lib/models/Customer';
 
 export async function POST(request: Request) {
   try {
@@ -68,13 +69,52 @@ export async function POST(request: Request) {
       paymentStatus: 'pending',
     });
 
-    for (const item of items) {
+for (const item of items) {
       await Product.findByIdAndUpdate(item.productId, {
         $inc: { inventory: -item.quantity },
       });
     }
 
-    return NextResponse.json(order, { status: 201 });
+    // Save or update customer
+    let savedCustomer = null;
+    try {
+      savedCustomer = await Customer.findOne({ storeId, email: customer.email.toLowerCase() });
+      
+      if (savedCustomer) {
+        savedCustomer.name = customer.name;
+        if (customer.phone) {
+          savedCustomer.phone = customer.phone;
+        }
+        savedCustomer.orderCount += 1;
+        savedCustomer.totalSpent = (savedCustomer.totalSpent || 0) + total;
+        await savedCustomer.save();
+      } else {
+        savedCustomer = await Customer.create({
+          storeId,
+          email: customer.email.toLowerCase(),
+          name: customer.name,
+          phone: customer.phone,
+          addresses: [{
+            firstName: shippingAddress.firstName,
+            lastName: shippingAddress.lastName,
+            address1: shippingAddress.address1,
+            address2: shippingAddress.address2 || '',
+            city: shippingAddress.city,
+            state: shippingAddress.state || '',
+            postalCode: shippingAddress.postalCode || '',
+            country: shippingAddress.country || 'Philippines',
+            phone: customer.phone,
+            isDefault: true,
+          }],
+          orderCount: 1,
+          totalSpent: total,
+        });
+      }
+    } catch (custError) {
+      console.error('Error saving customer:', custError);
+    }
+
+    return NextResponse.json({ order, customer: savedCustomer }, { status: 201 });
   } catch (error: any) {
     console.error('Create order error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
