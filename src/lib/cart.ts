@@ -5,9 +5,10 @@ export interface CartItem {
   images?: string[];
   quantity: number;
   inventory: number;
-  storeId: string;
+storeId: string;
   storeName?: string;
   storeSlug?: string;
+  variantSelection?: string;
 }
 
 export interface StoreCart {
