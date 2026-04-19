@@ -15,6 +15,13 @@ import {
   ChevronUp,
   Filter,
   X,
+  Heart,
+  Share2,
+  Eye,
+  Package,
+  Truck,
+  Shield,
+  RefreshCw,
 } from 'lucide-react';
 import { addToCart, getCartCount } from '@/lib/cart';
 
@@ -25,6 +32,7 @@ interface Product {
   price: number;
   comparePrice?: number;
   images: string[];
+  videos?: string[];
   inventory: number;
   isActive: boolean;
   isFeatured?: boolean;
@@ -38,6 +46,7 @@ interface StoreData {
   slug: string;
   description?: string;
   logo?: string;
+  coverImage?: string;
   settings?: {
     currency: string;
     taxRate: number;
@@ -110,7 +119,7 @@ export default function StorePage() {
     }
   };
 
-const handleAddToCart = (product: Product, qty: number = 1) => {
+  const handleAddToCart = (product: Product, qty: number = 1) => {
     if (!store) return;
     
     addToCart(store._id, store.name, store.slug, {
@@ -172,7 +181,7 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -180,7 +189,7 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
 
   if (!store) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <Store className="h-16 w-16 text-gray-300 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Store not found</h1>
@@ -232,20 +241,55 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
         </div>
       </header>
 
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-2">Welcome to {store.name}</h2>
-          {store.description && (
-            <p className="text-blue-100 max-w-2xl mx-auto">{store.description}</p>
-          )}
-          <div className="flex justify-center gap-6 mt-6 text-sm">
-            <div className="flex items-center gap-2">
-              <Store className="h-4 w-4" />
-              <span>{products.length} Products</span>
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center">
+            <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+              {store.logo ? (
+                <img src={store.logo} alt={store.name} className="w-20 h-20 rounded-full object-cover" />
+              ) : (
+                <Store className="h-12 w-12" />
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-              <span>Top Quality</span>
+            <h1 className="text-4xl font-bold mb-3">{store.name}</h1>
+            {store.description && (
+              <p className="text-blue-100 max-w-2xl mx-auto text-lg mb-6">{store.description}</p>
+            )}
+            
+            <div className="flex justify-center gap-8 text-sm">
+              <div className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                <span>{products.length} Products</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                <span>4.9 Rating</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Truck className="h-5 w-5" />
+                <span>Fast Delivery</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <Truck className="h-4 w-4 text-blue-600" />
+                <span>Free Shipping</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-green-600" />
+                <span>Secure Payment</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <RefreshCw className="h-4 w-4 text-purple-600" />
+                <span>Easy Returns</span>
+              </div>
             </div>
           </div>
         </div>
@@ -254,8 +298,8 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           <aside className="lg:w-64 flex-shrink-0">
-            <div className="bg-white rounded-xl shadow-md p-4 sticky top-24">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 sticky top-24">
+              <div className="flex items-center justify-between mb-5">
                 <h3 className="font-semibold text-gray-900">Filters</h3>
                 <button
                   onClick={() => setShowFilters(!showFilters)}
@@ -265,7 +309,7 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
                 </button>
               </div>
 
-              <div className={`space-y-4 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+              <div className={`space-y-5 ${showFilters ? 'block' : 'hidden lg:block'}`}>
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-2 block">Search</label>
                   <div className="relative">
@@ -275,7 +319,7 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
                       placeholder="Search products..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     />
                   </div>
                 </div>
@@ -285,9 +329,9 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
                   <div className="space-y-1">
                     <button
                       onClick={() => setSelectedCategory(null)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm ${
+                      className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                         !selectedCategory
-                          ? 'bg-blue-100 text-blue-700'
+                          ? 'bg-blue-600 text-white'
                           : 'hover:bg-gray-100 text-gray-700'
                       }`}
                     >
@@ -297,9 +341,9 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
                       <button
                         key={cat._id}
                         onClick={() => setSelectedCategory(cat._id)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-sm ${
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                           selectedCategory === cat._id
-                            ? 'bg-blue-100 text-blue-700'
+                            ? 'bg-blue-600 text-white'
                             : 'hover:bg-gray-100 text-gray-700'
                         }`}
                       >
@@ -314,16 +358,16 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   >
-                    <option value="newest">Newest</option>
+                    <option value="newest">Newest First</option>
                     <option value="price-low">Price: Low to High</option>
                     <option value="price-high">Price: High to Low</option>
                     <option value="name">Name: A-Z</option>
                   </select>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 pt-2">
                   <input
                     type="checkbox"
                     id="featured"
@@ -331,7 +375,7 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
                     onChange={(e) => setFeaturedOnly(e.target.checked)}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <label htmlFor="featured" className="text-sm text-gray-700">
+                  <label htmlFor="featured" className="text-sm text-gray-700 font-medium">
                     Featured Only
                   </label>
                 </div>
@@ -343,7 +387,7 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
                       setSearch('');
                       setFeaturedOnly(false);
                     }}
-                    className="w-full text-sm text-red-600 hover:text-red-700 flex items-center justify-center gap-1"
+                    className="w-full py-2.5 text-sm text-red-600 hover:text-red-700 flex items-center justify-center gap-1 bg-red-50 rounded-xl"
                   >
                     <X className="h-4 w-4" />
                     Clear Filters
@@ -355,16 +399,16 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
 
           <div className="flex-1">
             <div className="flex items-center justify-between mb-6">
-              <p className="text-gray-600">
+              <p className="text-gray-600 font-medium">
                 {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
                 {selectedCategory && ` in "${categories.find(c => c._id === selectedCategory)?.name}"`}
               </p>
             </div>
 
             {filteredProducts.length === 0 ? (
-              <div className="bg-white rounded-xl shadow-md p-12 text-center">
-                <ShoppingCart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-16 text-center">
+                <Package className="h-20 w-20 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
                 <p className="text-gray-500">
                   {search || selectedCategory
                     ? 'Try adjusting your filters.'
@@ -376,119 +420,127 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
                 {filteredProducts.map((product) => (
                   <div
                     key={product._id}
-                    className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-xl transition-all duration-300"
+                    className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden group hover:shadow-xl hover:border-blue-300 transition-all duration-300"
                   >
-                    <div className="relative aspect-square bg-gray-100">
+                    <div className="relative aspect-square bg-gray-100 overflow-hidden">
                       {product.images[0] ? (
                         <img
                           src={product.images[0]}
                           alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
                         <div className="flex items-center justify-center h-full text-gray-400">
-                          <Store className="h-16 w-16" />
+                          <Store className="h-20 w-20" />
                         </div>
                       )}
                       
                       {product.isFeatured && (
-                        <span className="absolute top-2 left-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
+                        <span className="absolute top-3 left-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-md">
                           <Star className="h-3 w-3 fill-current" />
                           Featured
                         </span>
                       )}
                       
                       {product.inventory === 0 && (
-                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                          <span className="bg-white text-gray-900 font-bold px-4 py-2 rounded-lg">
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                          <span className="bg-white text-gray-900 font-bold px-6 py-3 rounded-xl text-lg">
                             Out of Stock
                           </span>
                         </div>
                       )}
                       
                       {product.inventory > 0 && product.inventory <= 5 && (
-                        <span className="absolute top-2 right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
+                        <span className="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md animate-pulse">
                           Only {product.inventory} left!
                         </span>
                       )}
                       
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                      <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => setQuickViewProduct(product)}
-                          className="bg-white text-gray-900 p-3 rounded-full hover:bg-gray-100 transform hover:scale-110 transition-all"
+                          className="bg-white p-3 rounded-full hover:bg-gray-100 shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-all"
+                          title="Quick View"
                         >
-                          <Search className="h-5 w-5" />
+                          <Eye className="h-5 w-5 text-gray-700" />
+                        </button>
+                        <button
+                          className="bg-white p-3 rounded-full hover:bg-gray-100 shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-all"
+                          title="Add to Wishlist"
+                        >
+                          <Heart className="h-5 w-5 text-gray-700" />
                         </button>
                       </div>
                     </div>
                     
-                <div className="p-4">
-                    {product.categoryId && (
-                      <span className="text-xs text-blue-600 font-medium">
-                        {product.categoryId.name}
-                      </span>
-                    )}
-                    <h3 className="font-semibold text-gray-900 truncate mt-1">
-                      {product.name}
-                    </h3>
-                    
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-lg font-bold text-blue-600">
-                        {formatPrice(product.price)}
-                      </span>
-                      {product.comparePrice && product.comparePrice > product.price && (
-                        <span className="text-sm text-gray-400 line-through">
-                          {formatPrice(product.comparePrice)}
+                    <div className="p-4">
+                      {product.categoryId && (
+                        <span className="text-xs text-blue-600 font-semibold uppercase tracking-wide">
+                          {product.categoryId.name}
                         </span>
                       )}
+                      <h3 className="font-bold text-gray-900 text-lg mt-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                        {product.name}
+                      </h3>
+                      
+                      <div className="flex items-center gap-2 mt-3">
+                        <span className="text-xl font-bold text-blue-600">
+                          {formatPrice(product.price)}
+                        </span>
+                        {product.comparePrice && product.comparePrice > product.price && (
+                          <span className="text-sm text-gray-400 line-through">
+                            {formatPrice(product.comparePrice)}
+                          </span>
+                        )}
+                        {product.comparePrice && product.comparePrice > product.price && (
+                          <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-full">
+                            {Math.round((1 - product.price / product.comparePrice) * 100)}% OFF
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-2 mt-4">
+                        <div className="flex items-center border border-gray-300 rounded-lg bg-gray-50">
+                          <button
+                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                            disabled={quantity <= 1}
+                            className="p-2 hover:bg-gray-100 rounded-l-lg disabled:opacity-50"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </button>
+                          <span className="px-3 font-semibold min-w-[40px] text-center">{quantity}</span>
+                          <button
+                            onClick={() => setQuantity(Math.min(product.inventory, quantity + 1))}
+                            disabled={quantity >= product.inventory}
+                            className="p-2 hover:bg-gray-100 rounded-r-lg disabled:opacity-50"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </div>
+                        
+                        <button
+                          onClick={() => {
+                            handleAddToCart(product, quantity);
+                            setQuantity(1);
+                          }}
+                          disabled={product.inventory === 0}
+                          className={`flex-1 py-2.5 rounded-xl font-semibold transition-all ${
+                            product.inventory === 0
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : addedToCart === product._id
+                              ? 'bg-green-500 text-white'
+                              : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/30'
+                          }`}
+                        >
+                          {product.inventory === 0
+                            ? 'Out of Stock'
+                            : addedToCart === product._id
+                            ? '✓ Added!'
+                            : 'Add to Cart'}
+                        </button>
+                      </div>
                     </div>
-                    
-                    <div className="flex items-center gap-3 mt-2">
-                      <button
-                        onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                        disabled={quantity <= 1 || product.inventory < quantity - 1}
-                        className="p-1 hover:bg-gray-100 rounded"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </button>
-                      <span className="px-3 py-0.5 bg-gray-50 rounded text-sm font-medium">
-                        {quantity}
-                      </span>
-                      <button
-                        onClick={() => setQuantity(prev => Math.min(product.inventory, prev + 1))}
-                        disabled={quantity >= product.inventory}
-                        className="p-1 hover:bg-gray-100 rounded"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </button>
-                    </div>
-                    
-                <button
-                  onClick={() => {
-                    handleAddToCart(product, quantity);
-                    setQuantity(1); // Reset quantity after adding to cart
-                  }}
-                  disabled={product.inventory === 0 || quantity > product.inventory}
-                  className={`w-full mt-3 py-2.5 rounded-lg font-medium transition-all ${
-                    product.inventory === 0
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : quantity > product.inventory
-                      ? 'bg-red-100 text-red-400 cursor-not-allowed'
-                      : addedToCart === product._id
-                      ? 'bg-green-500 text-white'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  {product.inventory === 0
-                    ? 'Out of Stock'
-                    : quantity > product.inventory
-                    ? 'Not enough stock'
-                    : addedToCart === product._id
-                    ? 'Added!'
-                    : 'Add to Cart'}
-                </button>
                   </div>
-                </div>
                 ))}
               </div>
             )}
@@ -497,10 +549,17 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
       </main>
 
       {quickViewProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto relative">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <button
+              onClick={() => setQuickViewProduct(null)}
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full bg-white shadow-lg z-10"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            
             <div className="grid grid-cols-1 md:grid-cols-2">
-              <div className="aspect-square bg-gray-100">
+              <div className="aspect-square bg-gray-100 rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none overflow-hidden">
                 {quickViewProduct.images[0] ? (
                   <img
                     src={quickViewProduct.images[0]}
@@ -514,91 +573,124 @@ const handleAddToCart = (product: Product, qty: number = 1) => {
                 )}
               </div>
               
-                <div className="p-6">
-                    {quickViewProduct.categoryId && (
-                      <span className="text-sm text-blue-600 font-medium">
-                        {quickViewProduct.categoryId.name}
+              <div className="p-8">
+                {quickViewProduct.categoryId && (
+                  <span className="text-sm text-blue-600 font-semibold uppercase tracking-wide">
+                    {quickViewProduct.categoryId.name}
+                  </span>
+                )}
+                <h2 className="text-3xl font-bold text-gray-900 mt-2">
+                  {quickViewProduct.name}
+                </h2>
+                
+                <div className="flex items-baseline gap-3 mt-4">
+                  <span className="text-3xl font-bold text-blue-600">
+                    {formatPrice(quickViewProduct.price)}
+                  </span>
+                  {quickViewProduct.comparePrice && quickViewProduct.comparePrice > quickViewProduct.price && (
+                    <>
+                      <span className="text-xl text-gray-400 line-through">
+                        {formatPrice(quickViewProduct.comparePrice)}
                       </span>
-                    )}
-                    <h2 className="text-2xl font-bold text-gray-900 mt-1">
-                      {quickViewProduct.name}
-                    </h2>
-                    
-                    <div className="flex items-center gap-3 mt-3">
-                      <span className="text-2xl font-bold text-blue-600">
-                        {formatPrice(quickViewProduct.price)}
+                      <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-bold">
+                        {Math.round((1 - quickViewProduct.price / quickViewProduct.comparePrice) * 100)}% OFF
                       </span>
-                      {quickViewProduct.comparePrice && quickViewProduct.comparePrice > quickViewProduct.price && (
-                        <span className="text-lg text-gray-400 line-through">
-                          {formatPrice(quickViewProduct.comparePrice)}
-                        </span>
-                      )}
-                    </div>
-                    
-                    {quickViewProduct.description && (
-                      <p className="text-gray-600 mt-4">{quickViewProduct.description}</p>
-                    )}
-                    
-                 <div className="mt-4 flex items-center gap-2">
-                   {quickViewProduct.inventory > 10 && (
-                     <span className="text-green-600 font-medium">In Stock</span>
-                   )}
-                   {quickViewProduct.inventory > 0 && quickViewProduct.inventory <= 10 && (
-                     <span className="text-orange-600 font-medium">
-                       Only {quickViewProduct.inventory} left!
-                     </span>
-                   )}
-                   {quickViewProduct.inventory === 0 && (
-                     <span className="text-red-600 font-medium">Out of Stock</span>
-                   )}
-                 </div>
-                 
-                 <div className="mt-4 flex items-center gap-3">
-                   <button
-                     onClick={() => setQvQuantity(prev => Math.max(1, prev - 1))}
-                     disabled={qvQuantity <= 1 || quickViewProduct.inventory < qvQuantity - 1}
-                     className="p-1 hover:bg-gray-100 rounded"
-                   >
-                     <Minus className="h-4 w-4" />
-                   </button>
-                   <span className="px-3 py-0.5 bg-gray-50 rounded text-sm font-medium">
-                     {qvQuantity}
-                   </span>
-                   <button
-                     onClick={() => setQvQuantity(prev => Math.min(quickViewProduct.inventory, prev + 1))}
-                     disabled={qvQuantity >= quickViewProduct.inventory}
-                     className="p-1 hover:bg-gray-100 rounded"
-                   >
-                     <Plus className="h-4 w-4" />
-                   </button>
-                 </div>
-                 
-<button
-                     onClick={() => {
-                       handleAddToCart(quickViewProduct, qvQuantity);
-                       setQuickViewProduct(null);
-                       setQvQuantity(1);
-                     }}
-                     disabled={quickViewProduct.inventory === 0 || qvQuantity > quickViewProduct.inventory}
-                     className="w-full mt-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                   >
-                     {quickViewProduct.inventory === 0 ? 'Out of Stock' : 'Add to Cart'}
-                   </button>
+                    </>
+                  )}
+                </div>
+
+                <div className="mt-5">
+                  {quickViewProduct.inventory > 10 && (
+                    <span className="inline-flex items-center gap-2 text-green-600 font-semibold">
+                      <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                      In Stock
+                    </span>
+                  )}
+                  {quickViewProduct.inventory > 0 && quickViewProduct.inventory <= 10 && (
+                    <span className="inline-flex items-center gap-2 text-orange-600 font-semibold">
+                      <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
+                      Only {quickViewProduct.inventory} left!
+                    </span>
+                  )}
+                  {quickViewProduct.inventory === 0 && (
+                    <span className="inline-flex items-center gap-2 text-red-600 font-semibold">
+                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                      Out of Stock
+                    </span>
+                  )}
+                </div>
+                
+                {quickViewProduct.description && (
+                  <p className="text-gray-600 mt-6 leading-relaxed">{quickViewProduct.description}</p>
+                )}
+                
+                <div className="flex items-center gap-3 mt-6">
+                  <div className="flex items-center border-2 border-gray-300 rounded-xl bg-gray-50">
+                    <button
+                      onClick={() => setQvQuantity(Math.max(1, qvQuantity - 1))}
+                      disabled={qvQuantity <= 1}
+                      className="p-3 hover:bg-gray-100 rounded-l-xl disabled:opacity-50"
+                    >
+                      <Minus className="h-5 w-5" />
+                    </button>
+                    <span className="px-5 font-bold text-lg min-w-[50px] text-center">{qvQuantity}</span>
+                    <button
+                      onClick={() => setQvQuantity(Math.min(quickViewProduct.inventory, qvQuantity + 1))}
+                      disabled={qvQuantity >= quickViewProduct.inventory}
+                      className="p-3 hover:bg-gray-100 rounded-r-xl disabled:opacity-50"
+                    >
+                      <Plus className="h-5 w-5" />
+                    </button>
                   </div>
+                  
+                  <button
+                    onClick={() => {
+                      handleAddToCart(quickViewProduct, qvQuantity);
+                      setQuickViewProduct(null);
+                      setQvQuantity(1);
+                    }}
+                    disabled={quickViewProduct.inventory === 0 || qvQuantity > quickViewProduct.inventory}
+                    className="flex-1 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <ShoppingCart className="h-5 w-5" />
+                    {quickViewProduct.inventory === 0 ? 'Out of Stock' : 'Add to Cart'}
+                  </button>
+                </div>
+                
+                <div className="mt-6 pt-6 border-t border-gray-200 grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <Truck className="h-6 w-6 mx-auto text-blue-600 mb-1" />
+                    <span className="text-xs text-gray-600">Free Shipping</span>
+                  </div>
+                  <div>
+                    <Shield className="h-6 w-6 mx-auto text-green-600 mb-1" />
+                    <span className="text-xs text-gray-600">Secure Pay</span>
+                  </div>
+                  <div>
+                    <RefreshCw className="h-6 w-6 mx-auto text-purple-600 mb-1" />
+                    <span className="text-xs text-gray-600">Easy Returns</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      <footer className="bg-gray-900 text-white py-8 mt-12">
+      <footer className="bg-gray-900 text-white py-12 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="flex items-center justify-center gap-3 mb-4">
             {store.logo && (
-              <img src={store.logo} alt={store.name} className="h-6 w-6 object-contain" />
+              <img src={store.logo} alt={store.name} className="h-10 w-10 rounded-full object-cover" />
             )}
-            <span className="font-semibold">{store.name}</span>
+            <span className="text-2xl font-bold">{store.name}</span>
           </div>
-          <p className="text-gray-400 text-sm">© 2026 {store.name}. All rights reserved.</p>
+          <p className="text-gray-400 mb-4">© 2026 {store.name}. All rights reserved.</p>
+          <div className="flex justify-center gap-6 text-gray-400">
+            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <a href="#" className="hover:text-white transition-colors">Contact Us</a>
+          </div>
         </div>
       </footer>
     </div>
