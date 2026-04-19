@@ -4,10 +4,11 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { 
-  Package, 
+Package, 
   Upload, 
   X, 
-  Plus, 
+  Plus,
+  Play,
   Image as ImageIcon,
   Check,
   Loader2,
@@ -47,7 +48,7 @@ export default function NewProductPage() {
   const [dragActive, setDragActive] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
     name: '',
     description: '',
     sku: '',
@@ -60,8 +61,10 @@ export default function NewProductPage() {
     isActive: true,
     isFeatured: false,
     images: [] as string[],
+    videos: [] as string[],
     weight: '',
     variants: [] as Variant[],
+    attributes: {} as Record<string, string>,
   });
 
   useEffect(() => {
@@ -244,11 +247,13 @@ export default function NewProductPage() {
           categoryId: formData.categoryId || undefined,
           tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
           inventory: parseInt(formData.inventory) || 0,
-          isActive: formData.isActive,
+isActive: formData.isActive,
           isFeatured: formData.isFeatured,
           images: formData.images,
+          videos: formData.videos,
           weight: formData.weight ? parseFloat(formData.weight) : undefined,
           variants: formData.variants,
+          attributes: formData.attributes,
         }),
       });
 
@@ -443,6 +448,48 @@ export default function NewProductPage() {
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Product Videos</h2>
+            
+            <div className="space-y-3">
+              {formData.videos.map((video, idx) => (
+                <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                  <Play className="h-5 w-5 text-purple-600" />
+                  <input
+                    type="text"
+                    value={video}
+                    onChange={(e) => {
+                      const newVideos = [...formData.videos];
+                      newVideos[idx] = e.target.value;
+                      setFormData({ ...formData, videos: newVideos });
+                    }}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    placeholder="YouTube or Vimeo URL"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newVideos = formData.videos.filter((_, i) => i !== idx);
+                      setFormData({ ...formData, videos: newVideos });
+                    }}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, videos: [...formData.videos, ''] })}
+                className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg"
+              >
+                <Plus className="h-4 w-4" />
+                Add Video URL
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">Add YouTube or Vimeo URLs for product videos</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Pricing</h2>
             </div>
@@ -549,7 +596,7 @@ export default function NewProductPage() {
                 <Plus className="h-5 w-5 inline mr-2" />
                 Add variants (size, color, etc.)
               </button>
-            ) : (
+) : (
               <div className="space-y-4">
                 {formData.variants.map((variant, idx) => (
                   <div key={idx} className="border border-gray-200 rounded-xl p-4">
@@ -569,6 +616,72 @@ export default function NewProductPage() {
                         <X className="h-5 w-5" />
                       </button>
                     </div>
+                    
+                    <div className="ml-4 space-y-2">
+                      <p className="text-sm font-medium text-gray-700">Options</p>
+                      {variant.options.map((option, optIdx) => (
+                        <div key={optIdx} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={option.name}
+                            onChange={(e) => {
+                              const newVariants = [...formData.variants];
+                              newVariants[idx].options[optIdx].name = e.target.value;
+                              setFormData({ ...formData, variants: newVariants });
+                            }}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                            placeholder="Option name (e.g., Small)"
+                          />
+                          <input
+                            type="number"
+                            value={option.price}
+                            onChange={(e) => {
+                              const newVariants = [...formData.variants];
+                              newVariants[idx].options[optIdx].price = parseFloat(e.target.value) || 0;
+                              setFormData({ ...formData, variants: newVariants });
+                            }}
+                            className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                            placeholder="+₱"
+                            title="Price adjustment"
+                          />
+                          <input
+                            type="number"
+                            value={option.inventory}
+                            onChange={(e) => {
+                              const newVariants = [...formData.variants];
+                              newVariants[idx].options[optIdx].inventory = parseInt(e.target.value) || 0;
+                              setFormData({ ...formData, variants: newVariants });
+                            }}
+                            className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                            placeholder="Stock"
+                            title="Inventory"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newVariants = [...formData.variants];
+                              newVariants[idx].options = newVariants[idx].options.filter((_, i) => i !== optIdx);
+                              setFormData({ ...formData, variants: newVariants });
+                            }}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newVariants = [...formData.variants];
+                          newVariants[idx].options.push({ name: '', price: 0, inventory: 0 });
+                          setFormData({ ...formData, variants: newVariants });
+                        }}
+                        className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add Option
+                      </button>
+                    </div>
                   </div>
                 ))}
                 <button
@@ -579,8 +692,64 @@ export default function NewProductPage() {
                   <Plus className="h-4 w-4" />
                   Add another variant
                 </button>
-              </div>
+</div>
             )}
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Specifications / Attributes</h2>
+            
+            <div className="space-y-3">
+              {Object.entries(formData.attributes).map(([key, value], idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={key}
+                    onChange={(e) => {
+                      const newAttrs = { ...formData.attributes };
+                      const oldValue = newAttrs[key];
+                      delete newAttrs[key];
+                      newAttrs[e.target.value] = oldValue;
+                      setFormData({ ...formData, attributes: newAttrs });
+                    }}
+                    className="w-1/3 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Attribute name"
+                  />
+                  <span className="text-gray-400">:</span>
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={(e) => {
+                      const newAttrs = { ...formData.attributes };
+                      newAttrs[key] = e.target.value;
+                      setFormData({ ...formData, attributes: newAttrs });
+                    }}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    placeholder="Value"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newAttrs = { ...formData.attributes };
+                      delete newAttrs[key];
+                      setFormData({ ...formData, attributes: newAttrs });
+                    }}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, attributes: { ...formData.attributes, '': '' } })}
+                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              >
+                <Plus className="h-4 w-4" />
+                Add Specification
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">E.g., Material: Cotton, Brand: Sony, etc.</p>
           </div>
         </div>
 
