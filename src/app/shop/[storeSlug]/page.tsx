@@ -110,7 +110,7 @@ export default function StorePage() {
     }
   };
 
-  const handleAddToCart = (product: Product) => {
+const handleAddToCart = (product: Product, qty: number = 1) => {
     if (!store) return;
     
     addToCart(store._id, store.name, store.slug, {
@@ -119,10 +119,10 @@ export default function StorePage() {
       price: product.price,
       images: product.images,
       inventory: product.inventory,
-      quantity: 1,
+      quantity: qty,
     });
     
-    setCartCount(prev => prev + 1);
+    setCartCount(prev => prev + qty);
     setAddedToCart(product._id);
     setTimeout(() => setAddedToCart(null), 2000);
     window.dispatchEvent(new Event('cartUpdated'));
@@ -573,71 +573,18 @@ export default function StorePage() {
                    </button>
                  </div>
                  
-                  <button
-                    onClick={() => {
-                      handleAddToCart(quickViewProduct, qvQuantity);
-                      setQuickViewProduct(null);
-                      setQvQuantity(1);
-                    }}
-                    disabled={quickViewProduct.inventory === 0 || qvQuantity > quickViewProduct.inventory}
-                    className="w-full mt-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  >
-                    {quickViewProduct.inventory === 0 ? 'Out of Stock' : 'Add to Cart'}
-                  </button>
-                      <span className="px-3 py-0.5 bg-gray-50 rounded text-sm font-medium">
-                        {qvQuantity}
-                      </span>
-                      <button
-                        onClick={() => setQvQuantity(prev => Math.min(quickViewProduct.inventory, prev + 1))}
-                        disabled={qvQuantity >= quickViewProduct.inventory}
-                        className="p-1 hover:bg-gray-100 rounded"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </button>
-                    </div>
-                    
-                    <button
-                      onClick={() => {
-                        handleAddToCart(quickViewProduct, qvQuantity);
-                        setQuickViewProduct(null);
-                        setQvQuantity(1);
-                      }}
-                      disabled={quickViewProduct.inventory === 0 || qvQuantity > quickViewProduct.inventory}
-                      className="w-full mt-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    >
-                      {quickViewProduct.inventory === 0 ? 'Out of Stock' : 'Add to Cart'}
-                    </button>
+<button
+                     onClick={() => {
+                       handleAddToCart(quickViewProduct, qvQuantity);
+                       setQuickViewProduct(null);
+                       setQvQuantity(1);
+                     }}
+                     disabled={quickViewProduct.inventory === 0 || qvQuantity > quickViewProduct.inventory}
+                     className="w-full mt-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                   >
+                     {quickViewProduct.inventory === 0 ? 'Out of Stock' : 'Add to Cart'}
+                   </button>
                   </div>
-                
-                {quickViewProduct.description && (
-                  <p className="text-gray-600 mt-4">{quickViewProduct.description}</p>
-                )}
-                
-                <div className="mt-4 flex items-center gap-2">
-                  {quickViewProduct.inventory > 10 && (
-                    <span className="text-green-600 font-medium">In Stock</span>
-                  )}
-                  {quickViewProduct.inventory > 0 && quickViewProduct.inventory <= 10 && (
-                    <span className="text-orange-600 font-medium">
-                      Only {quickViewProduct.inventory} left!
-                    </span>
-                  )}
-                  {quickViewProduct.inventory === 0 && (
-                    <span className="text-red-600 font-medium">Out of Stock</span>
-                  )}
-                </div>
-                
-                <button
-                  onClick={() => {
-                    handleAddToCart(quickViewProduct);
-                    setQuickViewProduct(null);
-                  }}
-                  disabled={quickViewProduct.inventory === 0}
-                  className="w-full mt-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                >
-                  {quickViewProduct.inventory === 0 ? 'Out of Stock' : 'Add to Cart'}
-                </button>
-              </div>
             </div>
           </div>
         </div>
