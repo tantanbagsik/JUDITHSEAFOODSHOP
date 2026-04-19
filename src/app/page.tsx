@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { 
   Search, 
   ShoppingCart, 
   Menu, 
   X, 
-  Star, 
-  ChevronDown,
+  Star,
   Package,
   Truck,
   Shield,
@@ -17,7 +15,7 @@ import {
   ArrowRight,
   Heart,
   Filter,
-  Store,
+  Store as StoreIcon,
 } from 'lucide-react';
 import { addToCart, getCartCount, getAllStoreCarts, calculateCartTotals, clearCart } from '@/lib/cart';
 
@@ -41,6 +39,7 @@ interface Store {
   slug: string;
   logo?: string;
   description?: string;
+  productCount?: number;
 }
 
 export default function Home() {
@@ -82,7 +81,11 @@ export default function Home() {
           if (productsRes.ok) {
             const productsData = await productsRes.json();
             if (Array.isArray(productsData)) {
-              allProducts.push(...productsData.filter((p: Product) => p.isActive));
+              const storeProducts = productsData.filter((p: Product) => p.isActive);
+              storeProducts.forEach((p: Product) => {
+                p.storeId = { _id: store._id, name: store.name, slug: store.slug, logo: store.logo };
+              });
+              allProducts.push(...storeProducts);
             }
           }
         }
@@ -105,9 +108,6 @@ export default function Home() {
     const matchesStore = !selectedStore || p.storeId?._id === selectedStore;
     return matchesSearch && matchesStore;
   });
-
-  const featuredProducts = filteredProducts.filter(p => p.isFeatured);
-  const regularProducts = filteredProducts.filter(p => !p.isFeatured);
 
   const formatPrice = (price: number) => `₱${price.toFixed(2)}`;
 
@@ -225,6 +225,10 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-4">
+              <Link href="/login" className="hidden md:block text-gray-600 hover:text-gray-900">Sign In</Link>
+              <Link href="/register" className="hidden md:block px-4 py-2 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700">
+                Register
+              </Link>
               <button
                 onClick={() => setShowCart(true)}
                 className="relative p-2 hover:bg-gray-100 rounded-full"
@@ -259,7 +263,7 @@ export default function Home() {
               />
             </div>
             <Link href="/login" className="block py-2 text-gray-700">Sign In</Link>
-            <Link href="/register" className="block py-2 text-blue-600">Create Account</Link>
+            <Link href="/register" className="block py-2 text-blue-600">Register</Link>
           </div>
         )}
       </header>
@@ -289,7 +293,30 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="bg-gray-50 border-b">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <h2 className="text-2xl font-bold mb-6">Our Shops</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {stores.map((store) => (
+            <Link
+              key={store._id}
+              href={`/shop/${store.slug}`}
+              className="bg-white rounded-xl border border-gray-200 p-4 text-center hover:border-blue-300 hover:shadow-md transition-all"
+            >
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 overflow-hidden">
+                {store.logo ? (
+                  <img src={store.logo} alt={store.name} className="w-full h-full object-cover" />
+                ) : (
+                  <StoreIcon className="h-8 w-8 text-blue-600" />
+                )}
+              </div>
+              <h3 className="font-semibold text-sm line-clamp-2">{store.name}</h3>
+              <p className="text-xs text-gray-500 mt-1">{store.productCount || 0} products</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-gray-50 border-t">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4 overflow-x-auto">
           <button
             onClick={() => setSelectedStore(null)}
@@ -316,7 +343,7 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
-            {selectedStore ? stores.find(s => s._id === selectedStore)?.name : 'Featured Products'}
+            {selectedStore ? stores.find(s => s._id === selectedStore)?.name : 'All Products'}
           </h2>
           <span className="text-gray-500">{filteredProducts.length} products</span>
         </div>
@@ -426,6 +453,10 @@ export default function Home() {
 
       <footer className="bg-gray-900 text-white py-8 border-t border-gray-800">
         <div className="max-w-7xl mx-auto px-4 text-center">
+          <div className="flex justify-center gap-6 mb-4">
+            <Link href="/login" className="text-gray-400 hover:text-white">Sign In</Link>
+            <Link href="/register" className="text-gray-400 hover:text-white">Register</Link>
+          </div>
           <p className="text-gray-400">© 2026 Seafoods. All rights reserved.</p>
         </div>
       </footer>
@@ -474,7 +505,7 @@ export default function Home() {
                     return storeCarts.map((storeCart) => (
                       <div key={storeCart.storeId} className="mb-6">
                         <div className="flex items-center gap-2 mb-3 pb-2 border-b">
-                          <Store className="h-4 w-4 text-blue-600" />
+                          <StoreIcon className="h-4 w-4 text-blue-600" />
                           <span className="font-semibold">{storeCart.storeName}</span>
                         </div>
                         {storeCart.items.map((item) => (
