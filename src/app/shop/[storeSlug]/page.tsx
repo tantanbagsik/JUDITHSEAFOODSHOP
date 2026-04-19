@@ -66,6 +66,8 @@ export default function StorePage() {
   const [cartCount, setCartCount] = useState(0);
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [qvQuantity, setQvQuantity] = useState(1);
 
   useEffect(() => {
     if (storeSlug) {
@@ -420,46 +422,73 @@ export default function StorePage() {
                       </div>
                     </div>
                     
-                    <div className="p-4">
-                      {product.categoryId && (
-                        <span className="text-xs text-blue-600 font-medium">
-                          {product.categoryId.name}
+                <div className="p-4">
+                    {product.categoryId && (
+                      <span className="text-xs text-blue-600 font-medium">
+                        {product.categoryId.name}
+                      </span>
+                    )}
+                    <h3 className="font-semibold text-gray-900 truncate mt-1">
+                      {product.name}
+                    </h3>
+                    
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-lg font-bold text-blue-600">
+                        {formatPrice(product.price)}
+                      </span>
+                      {product.comparePrice && product.comparePrice > product.price && (
+                        <span className="text-sm text-gray-400 line-through">
+                          {formatPrice(product.comparePrice)}
                         </span>
                       )}
-                      <h3 className="font-semibold text-gray-900 truncate mt-1">
-                        {product.name}
-                      </h3>
-                      
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className="text-lg font-bold text-blue-600">
-                          {formatPrice(product.price)}
-                        </span>
-                        {product.comparePrice && product.comparePrice > product.price && (
-                          <span className="text-sm text-gray-400 line-through">
-                            {formatPrice(product.comparePrice)}
-                          </span>
-                        )}
-                      </div>
-                      
+                    </div>
+                    
+                    <div className="flex items-center gap-3 mt-2">
                       <button
-                        onClick={() => handleAddToCart(product)}
-                        disabled={product.inventory === 0}
-                        className={`w-full mt-4 py-2.5 rounded-lg font-medium transition-all ${
-                          product.inventory === 0
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : addedToCart === product._id
-                            ? 'bg-green-500 text-white'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
-                        }`}
+                        onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                        disabled={quantity <= 1 || product.inventory < quantity - 1}
+                        className="p-1 hover:bg-gray-100 rounded"
                       >
-                        {product.inventory === 0
-                          ? 'Out of Stock'
-                          : addedToCart === product._id
-                          ? 'Added!'
-                          : 'Add to Cart'}
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <span className="px-3 py-0.5 bg-gray-50 rounded text-sm font-medium">
+                        {quantity}
+                      </span>
+                      <button
+                        onClick={() => setQuantity(prev => Math.min(product.inventory, prev + 1))}
+                        disabled={quantity >= product.inventory}
+                        className="p-1 hover:bg-gray-100 rounded"
+                      >
+                        <Plus className="h-4 w-4" />
                       </button>
                     </div>
+                    
+                <button
+                  onClick={() => {
+                    handleAddToCart(product, quantity);
+                    setQuantity(1); // Reset quantity after adding to cart
+                  }}
+                  disabled={product.inventory === 0 || quantity > product.inventory}
+                  className={`w-full mt-3 py-2.5 rounded-lg font-medium transition-all ${
+                    product.inventory === 0
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : quantity > product.inventory
+                      ? 'bg-red-100 text-red-400 cursor-not-allowed'
+                      : addedToCart === product._id
+                      ? 'bg-green-500 text-white'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                >
+                  {product.inventory === 0
+                    ? 'Out of Stock'
+                    : quantity > product.inventory
+                    ? 'Not enough stock'
+                    : addedToCart === product._id
+                    ? 'Added!'
+                    : 'Add to Cart'}
+                </button>
                   </div>
+                </div>
                 ))}
               </div>
             )}
@@ -485,33 +514,100 @@ export default function StorePage() {
                 )}
               </div>
               
-              <div className="p-6">
-                <button
-                  onClick={() => setQuickViewProduct(null)}
-                  className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-                
-                {quickViewProduct.categoryId && (
-                  <span className="text-sm text-blue-600 font-medium">
-                    {quickViewProduct.categoryId.name}
-                  </span>
-                )}
-                <h2 className="text-2xl font-bold text-gray-900 mt-1">
-                  {quickViewProduct.name}
-                </h2>
-                
-                <div className="flex items-center gap-3 mt-3">
-                  <span className="text-2xl font-bold text-blue-600">
-                    {formatPrice(quickViewProduct.price)}
-                  </span>
-                  {quickViewProduct.comparePrice && quickViewProduct.comparePrice > quickViewProduct.price && (
-                    <span className="text-lg text-gray-400 line-through">
-                      {formatPrice(quickViewProduct.comparePrice)}
-                    </span>
-                  )}
-                </div>
+                <div className="p-6">
+                    {quickViewProduct.categoryId && (
+                      <span className="text-sm text-blue-600 font-medium">
+                        {quickViewProduct.categoryId.name}
+                      </span>
+                    )}
+                    <h2 className="text-2xl font-bold text-gray-900 mt-1">
+                      {quickViewProduct.name}
+                    </h2>
+                    
+                    <div className="flex items-center gap-3 mt-3">
+                      <span className="text-2xl font-bold text-blue-600">
+                        {formatPrice(quickViewProduct.price)}
+                      </span>
+                      {quickViewProduct.comparePrice && quickViewProduct.comparePrice > quickViewProduct.price && (
+                        <span className="text-lg text-gray-400 line-through">
+                          {formatPrice(quickViewProduct.comparePrice)}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {quickViewProduct.description && (
+                      <p className="text-gray-600 mt-4">{quickViewProduct.description}</p>
+                    )}
+                    
+                 <div className="mt-4 flex items-center gap-2">
+                   {quickViewProduct.inventory > 10 && (
+                     <span className="text-green-600 font-medium">In Stock</span>
+                   )}
+                   {quickViewProduct.inventory > 0 && quickViewProduct.inventory <= 10 && (
+                     <span className="text-orange-600 font-medium">
+                       Only {quickViewProduct.inventory} left!
+                     </span>
+                   )}
+                   {quickViewProduct.inventory === 0 && (
+                     <span className="text-red-600 font-medium">Out of Stock</span>
+                   )}
+                 </div>
+                 
+                 <div className="mt-4 flex items-center gap-3">
+                   <button
+                     onClick={() => setQvQuantity(prev => Math.max(1, prev - 1))}
+                     disabled={qvQuantity <= 1 || quickViewProduct.inventory < qvQuantity - 1}
+                     className="p-1 hover:bg-gray-100 rounded"
+                   >
+                     <Minus className="h-4 w-4" />
+                   </button>
+                   <span className="px-3 py-0.5 bg-gray-50 rounded text-sm font-medium">
+                     {qvQuantity}
+                   </span>
+                   <button
+                     onClick={() => setQvQuantity(prev => Math.min(quickViewProduct.inventory, prev + 1))}
+                     disabled={qvQuantity >= quickViewProduct.inventory}
+                     className="p-1 hover:bg-gray-100 rounded"
+                   >
+                     <Plus className="h-4 w-4" />
+                   </button>
+                 </div>
+                 
+                  <button
+                    onClick={() => {
+                      handleAddToCart(quickViewProduct, qvQuantity);
+                      setQuickViewProduct(null);
+                      setQvQuantity(1);
+                    }}
+                    disabled={quickViewProduct.inventory === 0 || qvQuantity > quickViewProduct.inventory}
+                    className="w-full mt-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    {quickViewProduct.inventory === 0 ? 'Out of Stock' : 'Add to Cart'}
+                  </button>
+                      <span className="px-3 py-0.5 bg-gray-50 rounded text-sm font-medium">
+                        {qvQuantity}
+                      </span>
+                      <button
+                        onClick={() => setQvQuantity(prev => Math.min(quickViewProduct.inventory, prev + 1))}
+                        disabled={qvQuantity >= quickViewProduct.inventory}
+                        className="p-1 hover:bg-gray-100 rounded"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                    
+                    <button
+                      onClick={() => {
+                        handleAddToCart(quickViewProduct, qvQuantity);
+                        setQuickViewProduct(null);
+                        setQvQuantity(1);
+                      }}
+                      disabled={quickViewProduct.inventory === 0 || qvQuantity > quickViewProduct.inventory}
+                      className="w-full mt-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    >
+                      {quickViewProduct.inventory === 0 ? 'Out of Stock' : 'Add to Cart'}
+                    </button>
+                  </div>
                 
                 {quickViewProduct.description && (
                   <p className="text-gray-600 mt-4">{quickViewProduct.description}</p>

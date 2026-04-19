@@ -12,6 +12,7 @@ export async function POST(request: Request) {
     const {
       storeId,
       customer,
+      shippingAddress,
       items,
       subtotal,
       tax,
@@ -22,8 +23,8 @@ export async function POST(request: Request) {
       notes,
     } = body;
 
-    if (!customer || !items?.length || !total) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!customer || !shippingAddress || !items?.length || !total) {
+      return NextResponse.json({ error: 'Missing required fields: customer, shippingAddress, items, total' }, { status: 400 });
     }
 
     if (!storeId) {
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
       storeId,
       orderNumber,
       customer,
+      shippingAddress,
       items,
       subtotal,
       tax,

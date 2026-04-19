@@ -16,3 +16,5 @@ export { default as Vendor } from './Vendor';
 export type { IVendor } from './Vendor';
 export { default as Menu } from './Menu';
 export type { IMenu, IMenuItem } from './Menu';
+export { default as Video } from './Video';
+export type { IVideo } from './Video';

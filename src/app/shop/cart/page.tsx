@@ -88,6 +88,10 @@ export default function CartPage() {
     setProcessing(true);
     setError('');
 
+    const nameParts = formData.name.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
     try {
       const orderData = {
         storeId: selectedStore,
@@ -95,20 +99,23 @@ export default function CartPage() {
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
-          address: {
-            street: formData.street,
-            city: formData.city,
-            state: formData.state,
-            zip: formData.zip,
-            country: formData.country,
-          },
+        },
+        shippingAddress: {
+          firstName,
+          lastName,
+          address1: formData.street,
+          city: formData.city,
+          state: formData.state || '',
+          postalCode: formData.zip || '',
+          country: formData.country,
+          phone: formData.phone,
         },
         items: currentCart.map((item: CartItem) => ({
           productId: item._id,
           name: item.name,
           price: item.price,
           quantity: item.quantity,
-          images: item.images,
+          image: item.images?.[0],
         })),
         subtotal: totals.subtotal,
         tax: totals.tax,

@@ -63,7 +63,7 @@ export async function PUT(
     await dbConnect();
 
     const updateData: Record<string, unknown> = {};
-    const allowedFields = ['name', 'description', 'price', 'comparePrice', 'inventory', 'categoryId', 'sku', 'images', 'isActive', 'isFeatured', 'variants', 'tags', 'weight', 'dimensions'];
+    const allowedFields = ['name', 'description', 'price', 'comparePrice', 'inventory', 'categoryId', 'sku', 'images', 'videos', 'isActive', 'isFeatured', 'variants', 'tags', 'weight', 'dimensions'];
 
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
