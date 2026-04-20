@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { 
   Search, 
@@ -16,6 +16,18 @@ import {
   Heart,
   Filter,
   Store as StoreIcon,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight as ChevronRightIcon,
+  Percent,
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
 } from 'lucide-react';
 import { addToCart, getCartCount, getAllStoreCarts, calculateCartTotals, clearCart } from '@/lib/cart';
 
@@ -45,12 +57,17 @@ interface Store {
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Store[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [searchSuggestions, setSearchSuggestions] = useState<Product[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   const [cartCount, setCartCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showCart, setShowCart] = useState(false);
+  const [storeMenuOpen, setStoreMenuOpen] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [formData, setFormData] = useState({
@@ -90,6 +107,9 @@ export default function Home() {
           }
         }
         setProducts(allProducts);
+        
+        const featured = allProducts.filter((p: Product) => p.isFeatured);
+        setFeaturedProducts(featured.length > 0 ? featured : allProducts.slice(0, 8));
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -98,16 +118,37 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    if (search.length >= 2) {
+      const filtered = products.filter(p => 
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.description?.toLowerCase().includes(search.toLowerCase())
+      ).slice(0, 8);
+      setSearchSuggestions(filtered);
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+    }
+  }, [search, products]);
+
   const updateCartCount = () => {
     const count = getCartCount();
     setCartCount(count);
   };
 
   const filteredProducts = products.filter(p => {
-    const matchesSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.description?.toLowerCase().includes(search.toLowerCase());
     const matchesStore = !selectedStore || p.storeId?._id === selectedStore;
     return matchesSearch && matchesStore;
   });
+
+  const nextSlide = () => {
+    setActiveSlide((prev) => (prev + 1) % Math.ceil(featuredProducts.length / 4));
+  };
+
+  const prevSlide = () => {
+    setActiveSlide((prev) => (prev - 1 + Math.ceil(featuredProducts.length / 4)) % Math.ceil(featuredProducts.length / 4));
+  };
 
   const formatPrice = (price: number) => `₱${price.toFixed(2)}`;
 
@@ -211,16 +252,75 @@ export default function Home() {
               <span className="text-xl font-bold text-gray-900">Seafoods</span>
             </Link>
 
+            <div className="hidden md:flex items-center gap-4">
+              <div className="relative">
+                <button
+                  onClick={() => setStoreMenuOpen(!storeMenuOpen)}
+                  className="flex items-center gap-1 px-3 py-2 text-gray-700 hover:text-blue-600 font-medium"
+                >
+                  All Stores <ChevronDown className="h-4 w-4" />
+                </button>
+                {storeMenuOpen && (
+                  <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50">
+                    {stores.map((store) => (
+                      <Link
+                        key={store._id}
+                        href={`/shop/${store.slug}`}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setStoreMenuOpen(false)}
+                      >
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
+                          {store.logo ? (
+                            <img src={store.logo} alt={store.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <StoreIcon className="h-4 w-4 text-blue-600" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{store.name}</p>
+                          <p className="text-xs text-gray-500">{store.productCount || 0} products</p>
+                        </div>
+                      </Link>
+                    ))}
+                    <Link href="/shop" className="flex items-center gap-3 px-4 py-2.5 text-sm text-blue-600 border-t mt-2" onClick={() => setStoreMenuOpen(false)}>
+                      View All Stores
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="hidden md:flex items-center flex-1 max-w-md mx-8">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder="Search seafood, fish, shrimp..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
+                {showSuggestions && searchSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 max-h-80 overflow-y-auto">
+                    {searchSuggestions.map((product) => (
+                      <Link
+                        key={product._id}
+                        href={`/shop/${product.storeId?.slug}`}
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50"
+                        onClick={() => setShowSuggestions(false)}
+                      >
+                        <img src={product.images[0]} alt={product.name} className="w-10 h-10 object-cover rounded-lg" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{product.name}</p>
+                          <p className="text-xs text-gray-500">{product.storeId?.name}</p>
+                        </div>
+                        <span className="text-blue-600 font-semibold">₱{product.price.toFixed(2)}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -262,6 +362,19 @@ export default function Home() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full"
               />
             </div>
+            <div className="mb-4">
+              <p className="text-sm font-semibold text-gray-500 mb-2">All Stores</p>
+              {stores.map((store) => (
+                <Link
+                  key={store._id}
+                  href={`/shop/${store.slug}`}
+                  className="flex items-center gap-2 py-2 text-gray-700"
+                >
+                  <StoreIcon className="h-4 w-4 text-blue-600" />
+                  {store.name}
+                </Link>
+              ))}
+            </div>
             <Link href="/login" className="block py-2 text-gray-700">Sign In</Link>
             <Link href="/register" className="block py-2 text-blue-600">Register</Link>
           </div>
@@ -292,6 +405,60 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {featuredProducts.length > 0 && (
+        <div className="bg-gray-50 border-b">
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Featured Products</h2>
+                <p className="text-gray-500">Our most popular picks</p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={prevSlide} className="p-2 bg-white border rounded-full hover:bg-gray-100">
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button onClick={nextSlide} className="p-2 bg-white border rounded-full hover:bg-gray-100">
+                  <ChevronRightIcon className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <div className="flex gap-4">
+                {featuredProducts.map((product) => (
+                  <Link
+                    key={product._id}
+                    href={`/shop/${product.storeId?.slug}`}
+                    className="w-64 flex-shrink-0 bg-white rounded-xl border overflow-hidden group hover:shadow-lg transition-all"
+                  >
+                    <div className="relative aspect-square bg-gray-100">
+                      {product.images[0] ? (
+                        <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-gray-400">
+                          <Package className="h-12 w-12" />
+                        </div>
+                      )}
+                      {product.isFeatured && (
+                        <span className="absolute top-2 left-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded">
+                          Featured
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <p className="text-xs text-blue-600 font-medium">{product.storeId?.name}</p>
+                      <h3 className="font-semibold text-gray-900 text-sm line-clamp-2">{product.name}</h3>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-lg font-bold text-blue-600">{formatPrice(product.price)}</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold mb-6">Our Shops</h2>

@@ -25,14 +25,7 @@ import { useState, useEffect } from 'react';
 
 const mainNav = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Products', href: '/dashboard/products', icon: Package },
   { name: 'Orders', href: '/dashboard/orders', icon: ShoppingCart },
-  { name: 'Customers', href: '/dashboard/customers', icon: Users },
-  { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
-];
-
-const moreNav = [
-  { name: 'Menu Builder', href: '/dashboard/menu', icon: MenuIcon },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 
@@ -170,36 +163,7 @@ export default function DashboardLayout({
                 </Link>
               ))}
 
-              <div className="relative group ml-1">
-                <button
-                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-                    moreNav.some(item => isActive(item.href))
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  More
-                  <ChevronDown className="h-4 w-4" />
-                </button>
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                  {moreNav.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={`flex items-center gap-3 px-4 py-2.5 text-sm ${
-                        isActive(item.href)
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <div className="w-px h-6 bg-gray-200 mx-3"></div>
+<div className="w-px h-6 bg-gray-200 mx-3"></div>
 
               {store && (
                 <Link
@@ -214,15 +178,7 @@ export default function DashboardLayout({
             </div>
 
             <div className="flex items-center gap-2">
-              <Link
-                href="/dashboard/products/new"
-                className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium shadow-lg shadow-blue-500/30 transition-all hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5"
-              >
-                <Plus className="h-4 w-4" />
-                New Product
-              </Link>
-
-              <Link
+<Link
                 href="/shop"
                 target="_blank"
                 className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
@@ -321,22 +277,8 @@ export default function DashboardLayout({
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                <item.icon className="h-4 w-4" />
+<item.icon className="h-4 w-4" />
                 {item.name}
-              </Link>
-            ))}
-            {moreNav.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg whitespace-nowrap transition-all ${
-                  isActive(item.href)
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <item.icon className="h-4 w-4" />
-                {item.name.split(' ')[0]}
               </Link>
             ))}
           </div>
@@ -369,8 +311,8 @@ export default function DashboardLayout({
               </button>
             </div>
 
-            <nav className="p-4 space-y-1">
-              {[...mainNav, ...moreNav].map((item) => (
+<nav className="p-4 space-y-1">
+              {mainNav.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
