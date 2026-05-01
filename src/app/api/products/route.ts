@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Product from '@/lib/models/Product';
 
+export const revalidate = 300;
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -34,12 +36,20 @@ export async function GET(request: Request) {
     }
 
     const products = await Product.find(query)
-      .populate('categoryId', 'name slug')
       .populate('storeId', 'name slug')
+      .lean()
       .sort({ isFeatured: -1, createdAt: -1 })
       .limit(100);
 
-    return NextResponse.json(products);
+    const response = NextResponse.json(products);
+    
+    if (!search && !storeId && !categoryId) {
+      response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+    } else {
+      response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+    }
+    
+    return response;
   } catch (error: any) {
     console.error('Get products error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -2,6 +2,7 @@ export interface CartItem {
   _id: string;
   name: string;
   price: number;
+  comparePrice?: number;
   images?: string[];
   quantity: number;
   inventory: number;
@@ -17,6 +18,12 @@ export interface StoreCart {
   storeSlug: string;
   items: CartItem[];
   updatedAt: number;
+  storeSettings?: {
+    currency: string;
+    shippingFee: number;
+    freeShippingThreshold: number;
+    taxRate: number;
+  };
 }
 
 export function getCartKey(storeId?: string): string {

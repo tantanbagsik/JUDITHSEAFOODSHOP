@@ -60,8 +60,25 @@ export default function CartPage() {
   useEffect(() => {
     loadCarts();
     window.addEventListener('cartUpdated', loadCarts);
+    syncCartFromDb();
     return () => window.removeEventListener('cartUpdated', loadCarts);
   }, []);
+
+  const syncCartFromDb = async () => {
+    try {
+      const res = await fetch('/api/cart');
+      if (res.ok) {
+        const { storeCarts: dbCarts } = await res.json();
+        if (dbCarts.length > 0) {
+          const { getStoreCartsKey } = await import('@/lib/cart');
+          localStorage.setItem(getStoreCartsKey(), JSON.stringify(dbCarts));
+          loadCarts();
+        }
+      }
+    } catch (e) {
+      console.error('Sync cart from DB error:', e);
+    }
+  };
 
   const loadCarts = () => {
     const carts = getAllStoreCarts();
@@ -76,7 +93,7 @@ export default function CartPage() {
 
   const currentCart = selectedStore ? getCart(selectedStore) : [];
   const currentStore = storeCarts.find(c => c.storeId === selectedStore);
-  const storeSettings = currentStore?.settings || { taxRate: 0.12, shippingFee: 50, freeShippingThreshold: 500 };
+  const storeSettings = currentStore?.storeSettings || { taxRate: 0.12, shippingFee: 50, freeShippingThreshold: 500 };
   const totals = calculateCartTotals(currentCart, storeSettings.taxRate, storeSettings.shippingFee, storeSettings.freeShippingThreshold);
   const totalItems = storeCarts.reduce((sum, cart) => sum + cart.items.reduce((s, i) => s + i.quantity, 0), 0);
 

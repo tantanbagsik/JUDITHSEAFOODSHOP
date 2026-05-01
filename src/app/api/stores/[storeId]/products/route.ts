@@ -163,14 +163,20 @@ export async function GET(request: Request) {
     }
 
     if (search) {
-      query.$text = { $search: search };
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
     }
 
     const products = await Product.find(query)
-      .populate('categoryId', 'name slug')
-      .sort({ createdAt: -1 });
+      .lean()
+      .sort({ isFeatured: -1, createdAt: -1 })
+      .limit(200);
 
-    return NextResponse.json(products);
+    const response = NextResponse.json(products);
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+    return response;
   } catch (error: any) {
     console.error('Get products error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

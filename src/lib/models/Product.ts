@@ -139,6 +139,8 @@ ProductSchema.index({ storeId: 1 });
 ProductSchema.index({ storeId: 1, isActive: 1 });
 ProductSchema.index({ storeId: 1, categoryId: 1 });
 ProductSchema.index({ name: 'text', description: 'text' });
+ProductSchema.index({ isActive: 1, isFeatured: -1, createdAt: -1 });
+ProductSchema.index({ isActive: 1, createdAt: -1 });
 
 const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
 

@@ -46,6 +46,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           role: user.role,
           storeId: user.storeId?.toString(),
+          image: user.avatar,
         };
       },
     }),
@@ -59,42 +60,33 @@ export const authOptions: NextAuthOptions = {
         
         if (!existingUser) {
           const newUser = await User.create({
-            name: user.name,
-            email: user.email,
-            image: user.image || (profile as any)?.picture || (profile as any)?.picture?.data?.url,
+            name: user.name || 'User',
+            email: user.email || '',
+            avatar: (user.image || (profile as any)?.picture || (profile as any)?.avatar || (profile as any)?.picture?.data?.url || undefined) as string | undefined,
             role: 'customer',
             isActive: true,
             authProvider: account.provider,
           });
           user.id = newUser._id.toString();
+          user.role = 'customer';
+          user.storeId = undefined;
         } else {
           user.id = existingUser._id.toString();
           user.role = existingUser.role;
           user.storeId = existingUser.storeId?.toString();
+          user.image = existingUser.avatar;
         }
       }
       return true;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.role = user.role as string;
         token.storeId = user.storeId;
-      }
-      if (account?.provider === 'google' || account?.provider === 'facebook') {
-        token.authProvider = account.provider;
-      }
-      if (token.id) {
-        try {
-          await dbConnect();
-          const freshUser = await User.findById(token.id);
-          if (freshUser) {
-            token.role = freshUser.role;
-            token.storeId = freshUser.storeId?.toString();
-          }
-        } catch (e) {
-          // Ignore errors during token refresh
-        }
+        token.email = user.email;
+        token.name = user.name;
+        token.image = user.image;
       }
       return token;
     },
@@ -103,6 +95,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
         session.user.storeId = token.storeId as string | undefined;
+        (session.user as any).image = token.image as string | undefined;
       }
       return session;
     },
@@ -114,6 +107,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60,
+    updateAge: 24 * 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

@@ -4,21 +4,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { 
-  ShoppingCart, 
-  Search, 
-  ArrowLeft, 
-  Store, 
-  Plus, 
-  Minus,
+import {
+  ShoppingCart,
+  Search,
+  ArrowLeft,
+  Store,
   Star,
-  ChevronDown,
-  ChevronUp,
   Filter,
   X,
-  Heart,
-  Share2,
-  Eye,
   Package,
   Truck,
   Shield,
@@ -27,7 +20,7 @@ import {
   LogOut,
   Menu,
 } from 'lucide-react';
-import { addToCart, getCartCount, getAllStoreCarts, calculateCartTotals, clearCart } from '@/lib/cart';
+import { addToCart, getCartCount } from '@/lib/cart';
 
 interface Product {
   _id: string;
@@ -83,18 +76,7 @@ export default function StorePage() {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [qvQuantity, setQvQuantity] = useState(1);
-  const [showCart, setShowCart] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [orderPlaced, setOrderPlaced] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    notes: '',
-  });
-  const [processing, setProcessing] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -203,68 +185,8 @@ export default function StorePage() {
     return `${symbol}${price.toFixed(2)}`;
   };
 
-  const handleCheckout = async () => {
-    if (!formData.name || !formData.email || !formData.address || !formData.city) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    const storeCarts = getAllStoreCarts();
-    if (storeCarts.length === 0) {
-      alert('Your cart is empty');
-      return;
-    }
-
-    setProcessing(true);
-
-    try {
-      for (const storeCart of storeCarts) {
-        const totals = calculateCartTotals(storeCart.items, 0.12, 100, 0);
-        
-        const orderData = {
-          storeId: storeCart.storeId,
-          customer: {
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-          },
-          shippingAddress: {
-            firstName: formData.name.split(' ')[0],
-            lastName: formData.name.split(' ').slice(1).join(' ') || '',
-            address1: formData.address,
-            city: formData.city,
-            country: 'Philippines',
-          },
-          items: storeCart.items.map(item => ({
-            productId: item._id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-          })),
-          subtotal: totals.subtotal,
-          tax: totals.tax,
-          shipping: totals.shipping,
-          total: totals.total,
-          paymentMethod: 'cod',
-          notes: formData.notes,
-        };
-
-        await fetch('/api/public/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(orderData),
-        });
-      }
-
-      storeCarts.forEach(c => clearCart(c.storeId));
-      setOrderPlaced(true);
-      updateCartCount();
-    } catch (error) {
-      console.error('Order error:', error);
-      alert('Failed to place order. Please try again.');
-    } finally {
-      setProcessing(false);
-    }
+  const handleCartClick = () => {
+    router.push('/shop/cart');
   };
 
   const handleLogout = async () => {
@@ -351,7 +273,7 @@ export default function StorePage() {
             </div>
 
             <button
-              onClick={() => setShowCart(true)}
+              onClick={handleCartClick}
               className="relative p-2 hover:bg-gray-100 rounded-full"
             >
               <ShoppingCart className="h-6 w-6 text-gray-700" />
@@ -584,125 +506,6 @@ export default function StorePage() {
           <p className="text-gray-400">© 2026 {store.name}. All rights reserved.</p>
         </div>
       </footer>
-
-      {showCart && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-end">
-          <div className="bg-white w-full max-w-md h-full overflow-y-auto">
-            <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white">
-              <h2 className="text-xl font-bold">Shopping Cart</h2>
-              <button onClick={() => setShowCart(false)} className="p-2 hover:bg-gray-100 rounded-full">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {orderPlaced ? (
-              <div className="p-8 text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Package className="h-8 w-8 text-green-600" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Order Placed!</h3>
-                <p className="text-gray-600 mb-6">Thank you for your order. We'll contact you shortly.</p>
-                <button
-                  onClick={() => {
-                    setShowCart(false);
-                    setOrderPlaced(false);
-                  }}
-                  className="w-full py-3 bg-blue-600 text-white rounded-xl font-semibold"
-                >
-                  Continue Shopping
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="p-4 flex-1">
-                  {(() => {
-                    const storeCarts = getAllStoreCarts();
-                    if (storeCarts.length === 0) {
-                      return (
-                        <div className="text-center py-12">
-                          <ShoppingCart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                          <p className="text-gray-500">Your cart is empty</p>
-                        </div>
-                      );
-                    }
-
-                    return storeCarts.map((storeCart) => (
-                      <div key={storeCart.storeId} className="mb-6">
-                        <div className="flex items-center gap-2 mb-3 pb-2 border-b">
-                          <Store className="h-4 w-4 text-blue-600" />
-                          <span className="font-semibold">{storeCart.storeName}</span>
-                        </div>
-                        {storeCart.items.map((item) => (
-                          <div key={item._id} className="flex gap-3 py-3 border-b">
-                            <img
-                              src={item.images?.[0] || '/placeholder.png'}
-                              alt={item.name}
-                              className="w-16 h-16 object-cover rounded-lg"
-                            />
-                            <div className="flex-1">
-                              <h4 className="font-medium text-sm line-clamp-2">{item.name}</h4>
-                              <p className="text-blue-600 font-bold">₱{item.price.toFixed(2)}</p>
-                              <p className="text-gray-500 text-sm">Qty: {item.quantity}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ));
-                  })()}
-                </div>
-
-                <div className="p-4 border-t bg-gray-50">
-                  <div className="mb-4 space-y-3">
-                    <input
-                      type="text"
-                      placeholder="Full Name *"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                    />
-                    <input
-                      type="email"
-                      placeholder="Email *"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                    />
-                    <input
-                      type="tel"
-                      placeholder="Phone Number *"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Delivery Address *"
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                    />
-                    <input
-                      type="text"
-                      placeholder="City *"
-                      value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                    />
-                  </div>
-
-                  <button
-                    onClick={handleCheckout}
-                    disabled={processing}
-                    className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 disabled:bg-gray-300"
-                  >
-                    {processing ? 'Processing...' : 'Place Order'}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
