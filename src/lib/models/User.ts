@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   email: string;
-  password: string;
+  password?: string;
   name: string;
   role: 'superadmin' | 'admin' | 'vendor' | 'customer';
   storeId?: mongoose.Types.ObjectId;
@@ -12,6 +12,7 @@ export interface IUser extends Document {
   phone?: string;
   isActive: boolean;
   emailVerified: Date | null;
+  authProvider?: 'credentials' | 'google' | 'facebook';
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -28,7 +29,6 @@ const UserSchema = new Schema<IUser>(
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
       minlength: 6,
       select: false,
     },
@@ -56,6 +56,11 @@ const UserSchema = new Schema<IUser>(
       type: Date,
       default: null,
     },
+    authProvider: {
+      type: String,
+      enum: ['credentials', 'google', 'facebook'],
+      default: 'credentials',
+    },
   },
   {
     timestamps: true,
@@ -63,7 +68,8 @@ const UserSchema = new Schema<IUser>(
 );
 
 UserSchema.pre('save', async function () {
-  if (!this.isNew && !this.isModified('password')) return;
+  if (!this.isNew || !this.password) return;
+  if (this.authProvider !== 'credentials') return;
   
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
@@ -72,6 +78,7 @@ UserSchema.pre('save', async function () {
 UserSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {
+  if (!this.password) return false;
   return bcrypt.compare(candidatePassword, this.password);
 };
 
