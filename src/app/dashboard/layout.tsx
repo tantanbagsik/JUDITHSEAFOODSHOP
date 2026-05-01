@@ -19,7 +19,8 @@ import {
   Plus,
   ExternalLink,
   Globe,
-  LayoutGrid
+  LayoutGrid,
+  Shield
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -27,6 +28,11 @@ const mainNav = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Orders', href: '/dashboard/orders', icon: ShoppingCart },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+];
+
+const adminNav = [
+  { name: 'Manage Stores', href: '/dashboard/admin/stores', icon: Shield },
+  { name: 'Manage Users', href: '/dashboard/admin/users', icon: Users },
 ];
 
 interface StoreData {
@@ -140,8 +146,8 @@ export default function DashboardLayout({
                   <h1 className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                     {store?.name || 'Judith Foods'}
                   </h1>
-                  <p className="text-xs text-gray-500 -mt-0.5">
-                    {session.user?.role === 'admin' ? 'Admin' : session.user?.role === 'vendor' ? 'Vendor' : 'Dashboard'}
+                   <p className="text-xs text-gray-500 -mt-0.5">
+                     {session.user?.role === 'superadmin' ? 'Super Admin' : session.user?.role === 'admin' ? 'Admin' : session.user?.role === 'vendor' ? 'Vendor' : 'Dashboard'}
                   </p>
                 </div>
               </Link>
@@ -163,7 +169,27 @@ export default function DashboardLayout({
                 </Link>
               ))}
 
-<div className="w-px h-6 bg-gray-200 mx-3"></div>
+              {(session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && (
+                <>
+                  <div className="w-px h-6 bg-gray-200 mx-2"></div>
+                  {adminNav.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                        isActive(item.href)
+                          ? 'bg-purple-50 text-purple-700'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                      }`}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {item.name}
+                    </Link>
+                  ))}
+                </>
+              )}
+
+              <div className="w-px h-6 bg-gray-200 mx-3"></div>
 
               {store && (
                 <Link
@@ -248,6 +274,28 @@ export default function DashboardLayout({
                           <Settings className="h-4 w-4 text-gray-500" />
                           Store Settings
                         </Link>
+                        {(session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && (
+                          <>
+                            <Link
+                              href="/dashboard/admin/stores"
+                              className="flex items-center gap-3 px-4 py-3 text-sm text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
+                              onClick={() => setProfileOpen(false)}
+                            >
+                              <Shield className="h-4 w-4 text-purple-600" />
+                              Manage Stores
+                            </Link>
+                            {session?.user?.role === 'superadmin' && (
+                              <Link
+                                href="/dashboard/admin/users"
+                                className="flex items-center gap-3 px-4 py-3 text-sm text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
+                                onClick={() => setProfileOpen(false)}
+                              >
+                                <Users className="h-4 w-4 text-purple-600" />
+                                Manage Users
+                              </Link>
+                            )}
+                          </>
+                        )}
                         <div className="my-2 border-t border-gray-100"></div>
                         <button
                           onClick={handleSignOut}
@@ -311,7 +359,7 @@ export default function DashboardLayout({
               </button>
             </div>
 
-<nav className="p-4 space-y-1">
+            <nav className="p-4 space-y-1">
               {mainNav.map((item) => (
                 <Link
                   key={item.name}
@@ -326,6 +374,27 @@ export default function DashboardLayout({
                   {item.name}
                 </Link>
               ))}
+
+              {(session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && (
+                <>
+                  <div className="my-3 border-t border-gray-200"></div>
+                  <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Admin</p>
+                  {adminNav.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                        isActive(item.href)
+                          ? 'bg-purple-50 text-purple-700'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      {item.name}
+                    </Link>
+                  ))}
+                </>
+              )}
             </nav>
 
             <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
