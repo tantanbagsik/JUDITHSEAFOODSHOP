@@ -1,0 +1,5 @@
+<!-- placeholder icon - replace with actual 1024x1024 PNG -->
+<svg width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" fill="#1565C0" rx="200"/>
+  <text x="512" y="580" font-size="400" fill="white" text-anchor="middle" font-family="Arial" font-weight="bold">J</text>
+</svg>

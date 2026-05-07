@@ -1,0 +1,29 @@
+Starting a Gradle Daemon, 1 busy Daemon could not be reused, use --status for details
+> Task :gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:compileKotlin
+> Task :gradle-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:classes UP-TO-DATE
+
+> Task :gradle-plugin:jar
+:jar: A valid plugin descriptor was found for com.facebook.react.properties but the implementation class com.facebook.react.ReactPlugin was not found in the jar.
+:jar: A valid plugin descriptor was found for com.facebook.react.rootproject.properties but the implementation class com.facebook.react.ReactRootProjectPlugin was not found in the jar.
+
+> Task :gradle-plugin:inspectClassesForKotlinIC FAILED
+w: Detected multiple Kotlin daemon sessions at build\kotlin\sessions
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':gradle-plugin:inspectClassesForKotlinIC'.
+> Cannot access input property 'classFiles$kotlin_gradle_plugin_common' of task ':gradle-plugin:inspectClassesForKotlinIC'. Accessing unreadable inputs or outputs is not supported. Declare the task as untracked by using Task.doNotTrackState(). For more information, please refer to https://docs.gradle.org/8.3/userguide/incremental_build.html#disable-state-tracking in the Gradle documentation.
+   > Failed to normalize content of 'C:\taindahan\judith-rn-app\node_modules\@react-native\gradle-plugin\build\classes\kotlin\main\com\facebook\react\internal\PrivateReactExtension.class'.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 2m 5s
+5 actionable tasks: 3 executed, 2 up-to-date
