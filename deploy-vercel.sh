@@ -13,7 +13,11 @@ export MONGODB_URI="mongodb://raybagsik0825_db_user:Titankalimot08@ac-y5vecbe-sh
 vercel deploy --prod \
   --env NEXTAUTH_SECRET="$NEXTAUTH_SECRET" \
   --env NEXTAUTH_URL="$NEXTAUTH_URL" \
-  --env MONGODB_URI="$MONGODB_URI"
+  --env MONGODB_URI="$MONGODB_URI" \
+  --env GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \
+  --env GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET" \
+  --env FACEBOOK_CLIENT_ID="$FACEBOOK_CLIENT_ID" \
+  --env FACEBOOK_CLIENT_SECRET="$FACEBOOK_CLIENT_SECRET"
 
 echo "✅ Deployment complete!"
 echo ""
