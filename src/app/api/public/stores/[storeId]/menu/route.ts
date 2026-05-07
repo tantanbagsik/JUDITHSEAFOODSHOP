@@ -23,11 +23,17 @@ export async function GET(
       .sort({ isFeatured: -1, createdAt: -1 })
       .lean();
 
+    const storeInfo = {
+      _id: store._id.toString(),
+      name: store.name,
+      slug: store.slug,
+    };
+
     const categoriesMap = new Map<string, any[]>();
     const allProducts: any[] = [];
 
     for (const product of products) {
-      const formatted = formatProduct(product);
+      const formatted = formatProduct(product, storeInfo);
       allProducts.push(formatted);
 
       const category = product.categoryId as any;
@@ -45,7 +51,7 @@ export async function GET(
       items,
     }));
 
-    const featured = products.filter(p => p.isFeatured).map(formatProduct);
+    const featured = products.filter(p => p.isFeatured).map(p => formatProduct(p, storeInfo));
 
     const response = NextResponse.json({
       store: {
@@ -55,6 +61,7 @@ export async function GET(
         description: store.description || '',
         logo: store.logo || null,
         banner: store.banner || null,
+        totalProducts: products.length,
         settings: store.settings || {
           shippingFee: 0,
           freeShippingThreshold: 0,
@@ -74,14 +81,16 @@ export async function GET(
   }
 }
 
-function formatProduct(product: any) {
+function formatProduct(product: any, storeInfo: { _id: string; name: string; slug: string }) {
   return {
     _id: product._id.toString(),
     name: product.name,
     description: product.description || '',
+    sku: product.sku || undefined,
     price: product.price,
     comparePrice: product.comparePrice || undefined,
     images: product.images || [],
+    storeId: storeInfo,
     inventory: product.inventory || 0,
     isActive: product.isActive,
     isFeatured: product.isFeatured || false,
@@ -91,5 +100,15 @@ function formatProduct(product: any) {
       name: (product.categoryId as any).name,
       slug: (product.categoryId as any).slug,
     } : undefined,
+    variants: (product.variants || []).map((v: any) => ({
+      name: v.name,
+      options: (v.options || []).map((o: any) => ({
+        name: o.name,
+        price: o.price || 0,
+        inventory: o.inventory || 0,
+      })),
+    })),
+    attributes: product.attributes || {},
+    weight: product.weight || undefined,
   };
 }
